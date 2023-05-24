@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const UserSchema = require('../models/userModel')
-const {createUser} = require('../controllers/userController')
+const {VerifyUser,AuthUser} = require('../controllers/userController')
 
 //Routes
 router.get('/',(req,res) =>{
@@ -12,6 +12,7 @@ router.get('/home',(req,res) =>{
     res.json({mssg:"Home"})
 })
 
-router.post('/userAuth',createUser)
+router.post('/userAuth',AuthUser)
+
 
 module.exports = router
