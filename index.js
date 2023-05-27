@@ -13,7 +13,7 @@ const corsOptions ={
    optionSuccessStatus:200,
 }
 
-app.use(cors(corsOptions))
+app.use(cors())
 //Logger
 app.use((req,res,next) =>{
     console.log(req.path, req.method)
