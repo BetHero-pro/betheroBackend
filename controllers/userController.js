@@ -21,21 +21,51 @@ const AuthUser = async(req,res) =>{
         }
         else{
           const userdata = await UserSchema.create({userName: userName})
-          return res.status(200).json(userdata)
+          //jwt auth
+          const token = jwt.sign({_id: userdata._id}, secretKey)
+          return res.json({token: token})
         }
       }catch(error){
           return res.status(400).json({error: error.message})
       }
 }
 
+//verify jwt token
+const VerifyToken =  async(req,res) =>{
+    token = req.body.token
+    //verify jwt token
+    try{
+        const verified = jwt.verify(token,secretKey)
+        if(verified){
+            try{
+                const findUser = await UserSchema.find({_id:verified._id})
+                return res.status(200).json(findUser)
+            }catch{
+                return res.status(400)
+            }
+        }
+        else{
+            console.log("failed to verify")
+        }
+    }
+    catch(err){
+        res.status(400).json({error:err})
+    }
+    
+    
+
+}
+
+//store quests
 const StoreQuest = async(req, res) => {
     var userID = req.body.userID 
     var Quest = req.body.Quest
     console.log(userID)
-    const quest = await questModel.create({ID: userID,Quest:Quest})
+    const quest = await QuestSchema.create({ID: userID,Quest:Quest,isChecked: false})
     return res.status(200).json(quest)
 }
 
+//fetch quests
 const FetchQuest = async(req, res) => {
     var userID = req.body.userID
     try{
@@ -47,10 +77,11 @@ const FetchQuest = async(req, res) => {
     }
 
 }
+//delete quests
 const DeleteQuest = async(req, res) => {
     var questID = req.body.questID
     try{
-        const deleteQuest = await QuestSchema.findByIdAndDelete({questID})
+        const deleteQuest = await QuestSchema.findByIdAndDelete({_id: questID})
         return res.status(200).json(deleteQuest)
     }
     catch{
@@ -59,11 +90,26 @@ const DeleteQuest = async(req, res) => {
 
 }
 
+//mark quests
+const MarkQuest = async(req, res) => {
+    var questID = req.body.questID
+    try{
+          const updatemode = await QuestSchema.findOneAndUpdate({_id: questID},{isChecked:true})
+       
+          return res.status(200).json({questChecked:true})
+      }
+      catch{
+          return res.status(400).json({questChecked:false})
+      }
+}
+
 
 
 module.exports = {
     AuthUser,
+    VerifyToken,
     StoreQuest,
     FetchQuest,
-    DeleteQuest
+    DeleteQuest,
+    MarkQuest
 }
