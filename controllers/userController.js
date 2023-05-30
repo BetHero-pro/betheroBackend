@@ -30,6 +30,7 @@ const AuthUser = async(req,res) =>{
       }
 }
 
+
 //verify jwt token
 const VerifyToken =  async(req,res) =>{
     token = req.body.token
