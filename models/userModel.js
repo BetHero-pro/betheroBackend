@@ -8,6 +8,7 @@ const UserSchema = new Schema({
         unique: true,
         required: true
     },
+  
     
    
 }, {timestamps: true})

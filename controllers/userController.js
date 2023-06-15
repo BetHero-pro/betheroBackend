@@ -8,6 +8,8 @@ const secretKey = '5f14a0f6e297f4a1f8d81932b4ebe57c0e3a5e5e36929c2670e888cfb8f7e
 //Auth the user
 const AuthUser = async(req,res) =>{
     var userName = req.body.userName
+    var discordID = req.body.discordID
+    var avatarID = req.body.avatarID
     console.log('Creating user')
     console.log(userName)
     
@@ -17,15 +19,22 @@ const AuthUser = async(req,res) =>{
         const checkuname = await UserSchema.find({userName: userName})
         if(checkuname.length != 0){
           console.log("username exists")
-          return res.status(400).json({isUnameExist:true})
+          //jwt token gen
+          console.log(checkuname)
+          const token = jwt.sign({data: checkuname}, secretKey)
+          return res.status(400).json({isUnameExist:true,token:token})
+
         }
         else{
-          const userdata = await UserSchema.create({userName: userName})
+          const userdata = await UserSchema.create({userName: userName, discordID: discordID, avatarID: avatarID})
           //jwt auth
-          const token = jwt.sign({_id: userdata._id}, secretKey)
+          console.log(typeof(userdata))
+          const token = jwt.sign({data: userdata}, secretKey)
+          console.log(token)
           return res.json({token: token})
         }
       }catch(error){
+        console.log(err)
           return res.status(400).json({error: error.message})
       }
 }
@@ -64,6 +73,21 @@ const StoreQuest = async(req, res) => {
     console.log(userID)
     const quest = await QuestSchema.create({ID: userID,Quest:Quest,isChecked: false})
     return res.status(200).json(quest)
+}
+
+//setting quest order
+const SetOrder = async(req,res) =>{
+        var questID = req.body.questID
+        var order = req.body.order
+        try{
+                const setOrder = await QuestSchema.findOneAndUpdate({_id: questID},{order:order})
+                const getOrder = await QuestSchema.findById({_id: questID})
+                return res.status(200).json(getOrder)
+        }
+        catch(err){
+                console.log(err)
+        }
+
 }
 
 //fetch quests
@@ -110,6 +134,7 @@ module.exports = {
     AuthUser,
     VerifyToken,
     StoreQuest,
+    SetOrder,
     FetchQuest,
     DeleteQuest,
     MarkQuest

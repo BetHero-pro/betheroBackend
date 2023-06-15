@@ -11,6 +11,10 @@ const QuestSchema = new Schema({
         type: String,
         required: true
     },
+    order:{
+            type: Number,
+            default: 0
+        },
     isChecked:{
       type: Boolean,
       required: true,
