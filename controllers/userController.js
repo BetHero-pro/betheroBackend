@@ -6,11 +6,13 @@ const secretKey = '5f14a0f6e297f4a1f8d81932b4ebe57c0e3a5e5e36929c2670e888cfb8f7e
 
 //Auth the user
 const AuthUser = async (req, res) => {
+  console.log(req.body);
   var userName = req.body.userName;
   var discordID = req.body.discordID;
   var avatarID = req.body.avatarID;
   console.log('Creating user');
   console.log(userName);
+  console.log(avatarID);
 
   //post to db
   try {
@@ -18,7 +20,13 @@ const AuthUser = async (req, res) => {
     const checkuname = await UserSchema.find({ userName: userName });
     if (checkuname.length != 0) {
       console.log('username exists');
+
+      const updateUserSchema = await UserSchema.findOneAndUpdate(
+        { _id: checkuname._id },
+        { userName: userName, discordID: discordID, avatarID: avatarID },
+      );
       //jwt token gen
+      console.log(checkuname._id);
       console.log(checkuname);
       const token = jwt.sign({ data: checkuname }, secretKey);
       return res.status(400).json({ isUnameExist: true, token: token });
@@ -30,12 +38,13 @@ const AuthUser = async (req, res) => {
       });
       //jwt auth
       console.log(typeof userdata);
+      console.log(userdata);
       const token = jwt.sign({ data: userdata }, secretKey);
       console.log(token);
       return res.json({ token: token });
     }
   } catch (error) {
-    console.log(err);
+    console.log(error);
     return res.status(400).json({ error: error.message });
   }
 };
