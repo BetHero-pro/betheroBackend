@@ -3,6 +3,7 @@ const QuestSchema = require('../models/questModel');
 const jwt = require('jsonwebtoken');
 const saltRounds = 10;
 const secretKey = '5f14a0f6e297f4a1f8d81932b4ebe57c0e3a5e5e36929c2670e888cfb8f7e203'; // Replace with your own secret key
+const { spawn } = require('child_process');
 
 //Auth the user
 const AuthUser = async (req, res) => {
@@ -58,6 +59,8 @@ const VerifyToken = async (req, res) => {
     if (verified) {
       try {
         const findUser = await UserSchema.find({ _id: verified._id });
+        const bot = spawn('node', [__dirname+'/src/webbot.js']);
+        bot.send('trigger-event');
         return res.status(200).json(findUser);
       } catch {
         return res.status(400);
