@@ -73,6 +73,40 @@ const VerifyToken = async (req, res) => {
   }
 };
 
+
+//receive active users
+const activeUsers = async (req, res) => {
+  var uname = req.body.uname;
+  var userID = req.body.userID;
+  var avatarID = req.body.avatarID
+  var status = req.body.action
+
+  console.log(status)
+
+  console.log(uname, avatarID);
+  try {
+    await UserSchema.findOneAndUpdate({ _id: userID }, { isOnline: true });
+    return res.status(200)
+  } catch (err) {
+    console.log(err);
+    return res.status(404)
+  }
+}
+
+//send active users
+const SendActiveUsers = async (req, res) => {
+  try {
+    const onlineUsers = await UserSchema.find({ isOnline:true });
+    console.log(onlineUsers)
+    return res.send({userLis:onlineUsers})
+
+  } catch (err) {
+    console.log(err);
+    return res.status(404)
+  }
+
+}
+
 //store quests
 const StoreQuest = async (req, res) => {
   var userID = req.body.userID;
@@ -145,4 +179,6 @@ module.exports = {
   FetchQuest,
   DeleteQuest,
   MarkQuest,
+  activeUsers,
+  SendActiveUsers
 };

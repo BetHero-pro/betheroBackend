@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const UserSchema = require('../models/userModel')
-const {AuthUser,VerifyToken,StoreQuest,SetOrder,FetchQuest,DeleteQuest,MarkQuest} = require('../controllers/userController')
+const {AuthUser,VerifyToken,StoreQuest,SetOrder,FetchQuest,DeleteQuest,MarkQuest,activeUsers,SendActiveUsers} = require('../controllers/userController')
 
 
 //Routes
@@ -22,6 +22,8 @@ router.post('/setOrder',SetOrder)
 router.post('/fetchQuest',FetchQuest)
 router.post('/deleteQuest',DeleteQuest)
 router.post('/markQuest',MarkQuest)
+router.post('/ActiveUsers',activeUsers)
+router.post('/getActiveUsers',SendActiveUsers)
 
 
 module.exports = router
