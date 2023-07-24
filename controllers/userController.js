@@ -1,5 +1,6 @@
 const UserSchema = require('../models/userModel');
 const QuestSchema = require('../models/questModel');
+const LogSchema = require('../models/questLogs')
 const jwt = require('jsonwebtoken');
 const saltRounds = 10;
 const secretKey = '5f14a0f6e297f4a1f8d81932b4ebe57c0e3a5e5e36929c2670e888cfb8f7e203'; // Replace with your own secret key
@@ -59,7 +60,7 @@ const VerifyToken = async (req, res) => {
     if (verified) {
       try {
         const findUser = await UserSchema.find({ _id: verified._id });
-        const bot = spawn('node', [__dirname+'/src/webbot.js']);
+        const bot = spawn('node', [__dirname + '/src/webbot.js']);
         bot.send('trigger-event');
         return res.status(200).json(findUser);
       } catch {
@@ -96,9 +97,9 @@ const activeUsers = async (req, res) => {
 //send active users
 const SendActiveUsers = async (req, res) => {
   try {
-    const onlineUsers = await UserSchema.find({ isOnline:true });
+    const onlineUsers = await UserSchema.find({ isOnline: true });
     console.log(onlineUsers)
-    return res.send({userLis:onlineUsers})
+    return res.send({ userLis: onlineUsers })
 
   } catch (err) {
     console.log(err);
@@ -171,6 +172,35 @@ const MarkQuest = async (req, res) => {
   }
 };
 
+
+// store logs
+
+const StoreLogs = async (req, res) => {
+  var userid = req.body.userid;
+  var name = req.body.name;
+  var state = req.body.state;
+  console.log(userid);
+  const log = await LogSchema.create({
+    USERID: userid,
+    Name: name,
+    State: state,
+
+  });
+  return res.status(200).json(log);
+};
+
+
+//fetch quests
+const FetchLogs = async (req, res) => {
+  var userID = req.body.userid;
+  try {
+    const findlogs = await LogSchema.find({ ID: userID });
+    return res.status(200).json(findlogs);
+  } catch {
+    return res.status(400).json({ doesNotexist: true });
+  }
+};
+
 module.exports = {
   AuthUser,
   VerifyToken,
@@ -180,5 +210,7 @@ module.exports = {
   DeleteQuest,
   MarkQuest,
   activeUsers,
-  SendActiveUsers
+  SendActiveUsers,
+  StoreLogs,
+  FetchLogs
 };
