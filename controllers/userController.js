@@ -196,7 +196,8 @@ const StoreLogs = async (req, res) => {
 const FetchLogs = async (req, res) => {
   var userID = req.body.userid;
   try {
-    const findlogs = await LogSchema.find({ ID: userID });
+    const findlogs = await LogSchema.find({ USERID: userID });
+    console.log(findlogs)
     return res.status(200).json(findlogs);
   } catch {
     return res.status(400).json({ doesNotexist: true });
