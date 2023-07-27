@@ -180,10 +180,12 @@ const StoreLogs = async (req, res) => {
   var name = req.body.name;
   var state = req.body.state;
   console.log(userid);
+  console.log(name);
+  console.log(state);
   const log = await LogSchema.create({
     USERID: userid,
     Name: name,
-    State: state,
+    state: state,
 
   });
   return res.status(200).json(log);
