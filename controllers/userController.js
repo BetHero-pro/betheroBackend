@@ -4,7 +4,8 @@ const LogSchema = require('../models/questLogs')
 const jwt = require('jsonwebtoken');
 const saltRounds = 10;
 const secretKey = '5f14a0f6e297f4a1f8d81932b4ebe57c0e3a5e5e36929c2670e888cfb8f7e203'; // Replace with your own secret key
-const { spawn } = require('child_process');
+
+const { getClient } = require('../utils/utils.js');
 
 //Auth the user
 const AuthUser = async (req, res) => {
@@ -24,13 +25,21 @@ const AuthUser = async (req, res) => {
       console.log('username exists');
 
       const updateUserSchema = await UserSchema.findOneAndUpdate(
-        { _id: checkuname._id },
+        { _id: checkuname[0]._id },
         { userName: userName, discordID: discordID, avatarID: avatarID },
       );
       //jwt token gen
-      console.log(checkuname._id);
+      console.log(checkuname[0]._id);
       console.log(checkuname);
       const token = jwt.sign({ data: checkuname }, secretKey);
+
+      const msg = `existing user came back ${checkuname[0].userName}`
+      //log in discord bot
+      setTimeout(() => {
+        console.log("sending to bot")
+        sendToDiscord(msg)
+      }, 3000);
+
       return res.status(400).json({ isUnameExist: true, token: token });
     } else {
       const userdata = await UserSchema.create({
@@ -43,6 +52,15 @@ const AuthUser = async (req, res) => {
       console.log(userdata);
       const token = jwt.sign({ data: userdata }, secretKey);
       console.log(token);
+
+
+      const msg = `welcome new user ${userName}`
+      //log in discord bot
+      setTimeout(() => {
+        console.log("sending to bot")
+        sendToDiscord(msg)
+      }, 3000);
+
       return res.json({ token: token });
     }
   } catch (error) {
@@ -60,8 +78,8 @@ const VerifyToken = async (req, res) => {
     if (verified) {
       try {
         const findUser = await UserSchema.find({ _id: verified._id });
-        const bot = spawn('node', [__dirname + '/src/webbot.js']);
-        bot.send('trigger-event');
+        console.log("verified user")
+        console.log(findUser.userName)
         return res.status(200).json(findUser);
       } catch {
         return res.status(400);
@@ -139,9 +157,30 @@ const SetOrder = async (req, res) => {
   return res.status(200).json(findQuest);
 };
 
+
+async function sendToDiscord(message) {
+  try {
+    const client = getClient(); // Retrieve the client object from utils.js
+    const channel = "1129262390681284628"; // Replace with your actual Discord channel ID
+
+    const discordChannel = await client.channels.fetch('1129262390681284628');
+    console.log(discordChannel)
+    if (!discordChannel) {
+      console.error(`Channel with ID ${channel} not found.`);
+      return;
+    }
+    await discordChannel.send(message);
+  } catch (error) {
+    console.error('Error sending message to Discord:', error);
+  }
+}
+
+
+
 //fetch quests
 const FetchQuest = async (req, res) => {
   var userID = req.body.userID;
+
   try {
     const findQuest = await QuestSchema.find({ ID: userID });
     return res.status(200).json(findQuest);
