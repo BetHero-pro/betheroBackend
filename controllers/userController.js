@@ -1,6 +1,6 @@
 const UserSchema = require('../models/userModel');
 const QuestSchema = require('../models/questModel');
-const LogSchema = require('../models/questLogs')
+const LogSchema = require('../models/questLogs');
 const PlaylistSchema = require('../models/playlistModel');
 const jwt = require('jsonwebtoken');
 const saltRounds = 10;
@@ -34,11 +34,11 @@ const AuthUser = async (req, res) => {
       console.log(checkuname);
       const token = jwt.sign({ data: checkuname }, secretKey);
 
-      const msg = `existing user came back ${checkuname[0].userName}`
+      const msg = `existing user came back ${checkuname[0].userName}`;
       //log in discord bot
       setTimeout(() => {
-        console.log("sending to bot")
-        sendToDiscord(msg)
+        console.log('sending to bot');
+        sendToDiscord(msg);
       }, 3000);
 
       return res.status(400).json({ isUnameExist: true, token: token });
@@ -54,12 +54,11 @@ const AuthUser = async (req, res) => {
       const token = jwt.sign({ data: userdata }, secretKey);
       console.log(token);
 
-
-      const msg = `welcome new user ${userName}`
+      const msg = `welcome new user ${userName}`;
       //log in discord bot
       setTimeout(() => {
-        console.log("sending to bot")
-        sendToDiscord(msg)
+        console.log('sending to bot');
+        sendToDiscord(msg);
       }, 3000);
 
       return res.json({ token: token });
@@ -79,8 +78,8 @@ const VerifyToken = async (req, res) => {
     if (verified) {
       try {
         const findUser = await UserSchema.find({ _id: verified._id });
-        console.log("verified user")
-        console.log(findUser.userName)
+        console.log('verified user');
+        console.log(findUser.userName);
         return res.status(200).json(findUser);
       } catch {
         return res.status(400);
@@ -93,39 +92,36 @@ const VerifyToken = async (req, res) => {
   }
 };
 
-
 //receive active users
 const activeUsers = async (req, res) => {
   var uname = req.body.uname;
   var userID = req.body.userID;
-  var avatarID = req.body.avatarID
-  var status = req.body.action
+  var avatarID = req.body.avatarID;
+  var status = req.body.action;
 
-  console.log(status)
+  console.log(status);
 
   console.log(uname, avatarID);
   try {
     await UserSchema.findOneAndUpdate({ _id: userID }, { isOnline: true });
-    return res.status(200)
+    return res.status(200);
   } catch (err) {
     console.log(err);
-    return res.status(404)
+    return res.status(404);
   }
-}
+};
 
 //send active users
 const SendActiveUsers = async (req, res) => {
   try {
     const onlineUsers = await UserSchema.find({ isOnline: true });
-    console.log(onlineUsers)
-    return res.send({ userLis: onlineUsers })
-
+    console.log(onlineUsers);
+    return res.send({ userLis: onlineUsers });
   } catch (err) {
     console.log(err);
-    return res.status(404)
+    return res.status(404);
   }
-
-}
+};
 
 //store quests
 const StoreQuest = async (req, res) => {
@@ -143,6 +139,7 @@ const StoreQuest = async (req, res) => {
 //setting quest order
 const SetOrder = async (req, res) => {
   const updatedOrderData = req.body.data;
+  const userID = req.body.userID;
   // var questID = req.body.questID
   // var order = req.body.order
   for (let i = 0; i < updatedOrderData.length; i++) {
@@ -158,14 +155,13 @@ const SetOrder = async (req, res) => {
   return res.status(200).json(findQuest);
 };
 
-
 async function sendToDiscord(message) {
   try {
     const client = getClient(); // Retrieve the client object from utils.js
-    const channel = "1129262390681284628"; // Replace with your actual Discord channel ID
+    const channel = '1129262390681284628'; // Replace with your actual Discord channel ID
 
     const discordChannel = await client.channels.fetch('1129262390681284628');
-    console.log(discordChannel)
+    console.log(discordChannel);
     if (!discordChannel) {
       console.error(`Channel with ID ${channel} not found.`);
       return;
@@ -175,8 +171,6 @@ async function sendToDiscord(message) {
     console.error('Error sending message to Discord:', error);
   }
 }
-
-
 
 //fetch quests
 const FetchQuest = async (req, res) => {
@@ -212,7 +206,6 @@ const MarkQuest = async (req, res) => {
   }
 };
 
-
 // store logs
 
 const StoreLogs = async (req, res) => {
@@ -226,18 +219,16 @@ const StoreLogs = async (req, res) => {
     USERID: userid,
     Name: name,
     state: state,
-
   });
   return res.status(200).json(log);
 };
-
 
 //fetch quests
 const FetchLogs = async (req, res) => {
   var userID = req.body.userid;
   try {
     const findlogs = await LogSchema.find({ USERID: userID });
-    console.log(findlogs)
+    console.log(findlogs);
     return res.status(200).json(findlogs);
   } catch {
     return res.status(400).json({ doesNotexist: true });
