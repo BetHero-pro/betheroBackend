@@ -1,6 +1,7 @@
 const UserSchema = require('../models/userModel');
 const QuestSchema = require('../models/questModel');
 const LogSchema = require('../models/questLogs')
+const PlaylistSchema = require('../models/playlistModel');
 const jwt = require('jsonwebtoken');
 const saltRounds = 10;
 const secretKey = '5f14a0f6e297f4a1f8d81932b4ebe57c0e3a5e5e36929c2670e888cfb8f7e203'; // Replace with your own secret key
@@ -243,6 +244,136 @@ const FetchLogs = async (req, res) => {
   }
 };
 
+//store playlist
+const StorePlaylist = async (req, res) => {
+  try {
+    var userID = req.body.userID;
+    var playlistData = req.body.playlist;
+    const playlist = await PlaylistSchema.create({
+      ID: userID,
+      ...playlistData,
+    });
+    return res.status(200).json(playlist);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ error: error });
+  }
+};
+
+const GetPlaylist = async (req, res) => {
+  try {
+    var userID = req.body.userID;
+    var playlistName = req.body.playlistName;
+    if (playlistName) {
+      // if a playlist name is provided, return the specific playlist
+      const findPlaylist = await PlaylistSchema.findOne({ ID: userID, name: playlistName });
+
+      if (findPlaylist) {
+        // filter out quests that are not checked
+        const uncheckedQuests = findPlaylist.quests.filter(quest => quest.isChecked === false);
+
+        // replace the quests array with the filtered array
+        findPlaylist.quests = uncheckedQuests;
+      }
+      return res.status(200).json(findPlaylist);
+    } else {
+      // if no playlist name is provided, return all playlists
+      const findPlaylists = await PlaylistSchema.find({ ID: userID });
+      return res.status(200).json(findPlaylists);
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ error: error });
+  }
+};
+
+const DeletePlaylists = async (req, res) => {
+  try {
+    var userID = req.body.userID;
+    const delPlaylists = await PlaylistSchema.deleteMany({ ID: userID });
+    return res.status(200).json(delPlaylists);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ error: error });
+  }
+};
+
+const StorePlaylistQuest = async (req, res) => {
+  try {
+    var userID = req.body.userID;
+    var playlistName = req.body.playlistName;
+    var Quest = req.body.Quest;
+
+    // Find the playlist by its name and user ID
+    var playlist = await PlaylistSchema.findOne({ ID: userID, name: playlistName });
+
+    if (!playlist) {
+      return res.status(400).json({ error: 'Playlist not found' });
+    }
+
+    // Create the new quest object
+    const quest = new QuestSchema({
+      ID: userID,
+      Quest: Quest,
+      isChecked: false,
+    });
+
+    // Add the new quest to the playlist's quests array
+    playlist.quests.push(quest);
+
+    // Save the updated playlist
+    await playlist.save();
+
+    return res.status(200).json(playlist);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ error: error });
+  }
+};
+
+const MarkPlaylistQuest = async (req, res) => {
+  //
+  var playlistID = req.body.playlistID;
+  var questID = req.body.questID;
+
+  try {
+    const updatedPlaylist = await PlaylistSchema.findOneAndUpdate(
+      { _id: playlistID, 'quests._id': questID },
+      { $set: { 'quests.$.isChecked': true } },
+      { new: true },
+    );
+
+    if (!updatedPlaylist) {
+      return res.status(500).json({ error: 'No matching playlist or quest found' });
+    }
+
+    return res.status(200).json(updatedPlaylist);
+  } catch (error) {
+    return res.status(400).json({ error: error.toString() });
+  }
+};
+
+const UpdatePlaylistQuests = async (req, res) => {
+  var playlistID = req.body.playlistID;
+  var updatedQuests = req.body.quests;
+
+  try {
+    const updatedPlaylist = await PlaylistSchema.findOneAndUpdate(
+      { _id: playlistID },
+      { $set: { quests: updatedQuests } }, // Here, we replace the old quests array with the new one.
+      { new: true },
+    );
+
+    if (!updatedPlaylist) {
+      return res.status(500).json({ error: 'No matching playlist or quest found' });
+    }
+
+    return res.status(200).json(updatedPlaylist);
+  } catch (error) {
+    return res.status(400).json({ error: error.toString() });
+  }
+};
+
 module.exports = {
   AuthUser,
   VerifyToken,
@@ -254,5 +385,11 @@ module.exports = {
   activeUsers,
   SendActiveUsers,
   StoreLogs,
-  FetchLogs
+  FetchLogs,
+  StorePlaylist,
+  GetPlaylist,
+  DeletePlaylists,
+  StorePlaylistQuest,
+  MarkPlaylistQuest,
+  UpdatePlaylistQuests,
 };
