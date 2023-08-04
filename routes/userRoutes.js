@@ -12,9 +12,6 @@ const {
   SendActiveUsers,
   StoreLogs,
   FetchLogs,
-  StorePlaylist,
-  GetPlaylist,
-  DeletePlaylists,
   StorePlaylistQuest,
   MarkPlaylistQuest,
   UpdatePlaylistQuests,
@@ -44,9 +41,6 @@ router.post('/storeLogs', StoreLogs)
 router.post('/fetchLogs', FetchLogs)
 
 //playlist
-router.post('/storePlaylist', StorePlaylist);
-router.post('/getPlaylist', GetPlaylist);
-router.post('/deletePlaylists', DeletePlaylists);
 router.post('/storePlaylistQuest', StorePlaylistQuest);
 router.post('/markPlaylistQuest', MarkPlaylistQuest);
 router.post('/updatePlaylistQuests', UpdatePlaylistQuests);
