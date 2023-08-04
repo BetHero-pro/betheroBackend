@@ -1,5 +1,7 @@
 const express = require('express');
 const userRoutes = require('./routes/userRoutes');
+const playlistRoutes = require('./routes/playlistRoutes');
+const questRoutes = require('./routes/questRoutes');
 require('dotenv').config();
 const mongoose = require('mongoose');
 const app = express();
@@ -49,6 +51,8 @@ app.use(bodyparser.urlencoded({ extended: true }));
 mongoose.set('strictQuery', true);
 // Routes
 app.use('/', userRoutes);
+app.use('/', playlistRoutes);
+app.use('/quests', questRoutes);
 
 async function sendToDiscord(message) {
   try {

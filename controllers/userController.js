@@ -236,58 +236,6 @@ const FetchLogs = async (req, res) => {
 };
 
 //store playlist
-const StorePlaylist = async (req, res) => {
-  try {
-    var userID = req.body.userID;
-    var playlistData = req.body.playlist;
-    const playlist = await PlaylistSchema.create({
-      ID: userID,
-      ...playlistData,
-    });
-    return res.status(200).json(playlist);
-  } catch (error) {
-    console.log(error);
-    return res.status(400).json({ error: error });
-  }
-};
-
-const GetPlaylist = async (req, res) => {
-  try {
-    var userID = req.body.userID;
-    var playlistName = req.body.playlistName;
-    if (playlistName) {
-      // if a playlist name is provided, return the specific playlist
-      const findPlaylist = await PlaylistSchema.findOne({ ID: userID, name: playlistName });
-
-      if (findPlaylist) {
-        // filter out quests that are not checked
-        const uncheckedQuests = findPlaylist.quests.filter(quest => quest.isChecked === false);
-
-        // replace the quests array with the filtered array
-        findPlaylist.quests = uncheckedQuests;
-      }
-      return res.status(200).json(findPlaylist);
-    } else {
-      // if no playlist name is provided, return all playlists
-      const findPlaylists = await PlaylistSchema.find({ ID: userID });
-      return res.status(200).json(findPlaylists);
-    }
-  } catch (error) {
-    console.log(error);
-    return res.status(400).json({ error: error });
-  }
-};
-
-const DeletePlaylists = async (req, res) => {
-  try {
-    var userID = req.body.userID;
-    const delPlaylists = await PlaylistSchema.deleteMany({ ID: userID });
-    return res.status(200).json(delPlaylists);
-  } catch (error) {
-    console.log(error);
-    return res.status(400).json({ error: error });
-  }
-};
 
 const StorePlaylistQuest = async (req, res) => {
   try {
@@ -377,9 +325,6 @@ module.exports = {
   SendActiveUsers,
   StoreLogs,
   FetchLogs,
-  StorePlaylist,
-  GetPlaylist,
-  DeletePlaylists,
   StorePlaylistQuest,
   MarkPlaylistQuest,
   UpdatePlaylistQuests,
