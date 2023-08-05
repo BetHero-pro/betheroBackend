@@ -65,8 +65,18 @@ const OrderQuests = async (req, res) => {
   }
 };
 
+const RemoveQuests = async (req, res) => {
+  try {
+    // delete all quest for an ID
+    const { userID } = req.body;
+    await QuestSchema.deleteMany({ ID: userID });
+    return res.status(200).json({ message: 'Quests deleted' });
+  } catch (error) {}
+};
+
 module.exports = {
   GetQuests,
   CreateQuest,
   OrderQuests,
+  RemoveQuests,
 };
