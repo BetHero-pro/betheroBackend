@@ -26,7 +26,9 @@ router.get('/home', (req, res) => {
     res.json({ mssg: "Home" })
 })
 
-
+router.get('/bird', (req, res) => {
+    res.json({ mssg: "Bird" })
+})
 
 router.post('/userAuth', AuthUser)
 router.post('/verifyUser', VerifyToken)
